@@ -3,8 +3,12 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"os"
 )
+
+// For Part I: Change this to 2
+const N_DIGITS = 12
 
 func parse_puzzle_input(filepath string) ([][]int, error) {
 	file, err := os.Open(filepath)
@@ -36,19 +40,32 @@ func parse_puzzle_input(filepath string) ([][]int, error) {
 }
 
 func find_maximum(bank []int) int {
-	current_max := 0
+	left_index := 0
+	var selected_values [12]int
 
-	for i := 0; i < len(bank)-1; i++ {
-		for j := i + 1; j < len(bank); j++ {
-			val := (bank[i] * 10) + bank[j]
+	// Since we string up values left->right, the first maximum digit within the
+	// allowed window will necessarily make the resulting number larger or equal to any
+	// possible alternative.
+	for n := N_DIGITS; n > 0; n-- {
+		highest_digit := 0
 
-			if val > current_max {
-				current_max = val
+		for i := left_index; i <= len(bank)-n; i++ {
+			if bank[i] > highest_digit {
+				highest_digit = bank[i]
+				left_index = i + 1
 			}
 		}
+		selected_values[N_DIGITS-n] = highest_digit
+	}
+	var total int
+
+	// The selected digits are just like ordered decimal numbers
+	for n := 0; n < N_DIGITS; n++ {
+		power := math.Pow10(12 - (n + 1))
+		total += int(float64(selected_values[n]) * power)
 	}
 
-	return current_max
+	return total
 }
 
 func main() {
